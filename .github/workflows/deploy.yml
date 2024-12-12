@@ -2,26 +2,32 @@ name: Build and Deploy
 on:
   push:
     branches:
-      - master
+      - master # Change to 'main' if your default branch is named 'main'
 permissions:
   contents: write
+
 jobs:
   build-and-deploy:
-    concurrency: ci-${{ github.ref }} # Recommended if you intend to make multiple deployments in quick succession.
+    concurrency: ci-${{ github.ref }} # Prevents multiple simultaneous deployments for the same ref
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3 # Checks out your code from the repository
 
-      - name: Install and Build 🔧 # This example project is built using npm and outputs the result to the 'build' folder. Replace with the commands required to build your project, or remove this step entirely if your site is pre-built.
+      - name: Install and Build 🔧
         run: |
+          # Install dependencies using yarn. If you use npm, replace with:
+          # npm install
           yarn install --immutable --immutable-cache --check-cache
+          # Build the project. Adjust 'yarn build' to your specific build command (e.g., npm run build)
           yarn build
+          # Ensure GitHub Pages compatibility by adding .nojekyll file
           touch build/.nojekyll
+          # Fix for 404 errors by copying 404.html as index.html
           cp build/404.html build/index.html
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: build # The folder the action should deploy.
-          branch: gh-pages
+          folder: build # Specify the output directory of your build process
+          branch: gh-pages # Target branch for GitHub Pages deployment
